@@ -1,4 +1,4 @@
-
+import urllib
 from flask import Module, request, redirect, url_for
 from flaskext.genshi import render_response
 
@@ -15,7 +15,12 @@ app = Module(__name__)
 def index():
     db = database.root
     if 'query' in request.args:
-        return redirect(url_for('query', query=request.args.get('query')))
+        query_str = request.args.get('query')
+
+        # Manually escape '.' so it does not get interpreted as part of a
+        # relative path.
+        escaped_query = urllib.quote_plus(query_str).replace(".", "%2E")
+        return redirect(url_for("query", query="") + escaped_query)
     types = [(t[0], t[1], t[0].replace('-', ' ')) for t in TYPES]
     classes = set(e.grammarclass for e in db.entries.itervalues()
                                  if e.grammarclass)
@@ -24,7 +29,7 @@ def index():
     return render_response('index.html', locals())
 
 
-@app.route('/<query>')
+@app.route('/<path:query>')
 @etag
 def query(query):
     db = database.root
