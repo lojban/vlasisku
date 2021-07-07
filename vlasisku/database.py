@@ -243,9 +243,16 @@ class Root(object):
 
         >>> from vlasisku.extensions import database
         >>> len(database.root.query('class:UI4')['matches'])
-        6
+        7
+        >>> from vlasisku.extensions import database
+        >>> database.root.query("la'au")['entry']
+        <Entry la'au>
+        >>> from vlasisku.extensions import database
+        >>> database.root.query("la'au ")['entry']
+        <Entry la'au>
 
         """
+        query = query.strip()
         parsed_query = parse_query(query)
         matches = set()
         entry = self.entries.get(query, None)

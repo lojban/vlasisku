@@ -157,7 +157,7 @@ def jbofihe(text):
     >>> jbofihe('coi ro')
     Traceback (most recent call last):
       ...
-    ValueError: not grammatical: coi ro ⚠
+    ValueError: not grammatical
     >>> jbofihe('(')
     Traceback (most recent call last):
       ...
@@ -208,14 +208,14 @@ def jbofihe(text):
 
 def jvocuhadju(text):
     """Call ``jvocuhadju'' on text and return the output.
-    Returns up to 8 highest-scoring lujvo as a list of strings, ascending order by score.
+    Returns up to 4 highest-scoring lujvo as a list of strings, ascending order by score.
 
     >>> jvocuhadju('melbi cmalu nixli ckule')
-    ["mlecmaxlicu'e", "melcmaxlicu'e", "mlecmanixycu'e", "melcmanixycu'e", "mlecmaxlickule", "melcmaxlickule", "mlecmalyxlicu'e", "mlecmanixlycu'e"]
+    ["mlecmaxlicu'e", "melcmaxlicu'e", "mlecmanixycu'e", "melcmanixycu'e"]
     >>> jvocuhadju('coi rodo')
     Traceback (most recent call last):
       ...
-    ValueError: Cannot use component [coi] in forming lujvo
+    ValueError: Cannot use component [coi] in forming lujvo.
     """
     data = Queue(1)
     process = Popen(('/usr/local/bin/jvocuhadju',) + tuple(text.split(' ')),
