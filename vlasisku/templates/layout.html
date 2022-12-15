@@ -34,7 +34,7 @@
                 <div>
                     <form action="/" method="get" onsubmit="return search();" id="search" name="search">
                         <p>
-                            <input type="text" value="{{ query if query }}" size="30" id="query" name="query" accesskey="f" tabindex="1" onfocus="this.select()"/>
+                            <input type="text" value="{{ query if query }}" size="30" id="query" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" name="query" accesskey="f" tabindex="1" onfocus="this.select()"/>
                             <button type="submit"><img src="{{ url_for('static', filename='favicon-16.png') }}" alt=""/> Find!</button>
                         </p>
                     </form>
