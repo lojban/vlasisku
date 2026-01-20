@@ -83,7 +83,8 @@ def updatedb():
     # The bot key is essentially a magic secret for vlasisku and things like
     # it, so you don't have to login with real credentials.  If it stops
     # working, contact the jbovlaste administrator.
-    url = 'https://jbovlaste.lojban.org/export/xml-export.html?lang=en&bot_key=z2BsnKYJhAB0VNsl'
+    # Use cached export from lensisku (same jbovlaste format, but faster/stabler).
+    url = 'https://lensisku.lojban.org/api/export/cached/en/xml'
     with closing(opener.open(url)) as data:
         print('Parsing jbovlaste xml')
         xml = etree.parse(data)

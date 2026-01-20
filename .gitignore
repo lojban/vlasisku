@@ -5,3 +5,4 @@ vlasisku/data/irc.nickserv.valsi.secret
 *.swp
 *.pyc
 .git
+.specstory/**/*

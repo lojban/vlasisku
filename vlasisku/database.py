@@ -420,6 +420,22 @@ class Root(object):
                   if e not in exclude)
 
     def _load_entries(self, xml):
+        """Load entries from either the classic jbovlaste schema (<valsi>)
+        or the lensisku cached export schema (<entries>/<entry>)."""
+        valsi_nodes = list(xml.findall('.//valsi'))
+        entry_nodes = list(xml.findall('.//entry')) if not valsi_nodes else []
+
+        if valsi_nodes:
+            self._load_entries_from_valsis(valsi_nodes)
+        elif entry_nodes:
+            self._load_entries_from_entries(entry_nodes)
+        else:
+            self.entries = OrderedDict()
+            self.definition_stems = {}
+            self.note_stems = {}
+            print('No entries found in XML.')
+
+    def _load_entries_from_valsis(self, valsi_nodes):
         processors = {'rafsi': self._process_rafsi,
                       'selmaho': self._process_selmaho,
                       'definition': self._process_definition,
@@ -429,10 +445,10 @@ class Root(object):
         self.definition_stems = {}
         self.note_stems = {}
 
-        count=0
+        count = 0
 
         for type, _ in TYPES:
-            for valsi in xml.findall('.//valsi'):
+            for valsi in valsi_nodes:
                 if valsi.get('type') == type:
                     count += 1
                     if count % 1000 == 0:
@@ -448,9 +464,49 @@ class Root(object):
 
                     for child in valsi:
                         tag, text = child.tag, child.text
-                        processors.get(tag, lambda a,b: None)(entry, text)
+                        processors.get(tag, lambda a, b: None)(entry, text)
 
                     self.entries[entry.word] = entry
+
+        for entry in self.entries.values():
+            if entry.notes:
+                entry.notes = braces2links(entry.notes, self.entries)
+
+    def _load_entries_from_entries(self, entry_nodes):
+        processors = {'rafsi': self._process_rafsi,
+                      'selmaho': self._process_selmaho,
+                      'definition': self._process_definition,
+                      'notes': self._process_notes}
+
+        self.entries = OrderedDict()
+        self.definition_stems = {}
+        self.note_stems = {}
+
+        count = 0
+
+        for entry_elem in entry_nodes:
+            type = entry_elem.findtext('type')
+            word = entry_elem.findtext('word')
+            if not word or not type or type not in dict(TYPES):
+                continue
+            count += 1
+            if count % 1000 == 0:
+                sys.stdout.write('.')
+                sys.stdout.flush()
+
+            entry = Entry(self)
+            entry.type = type
+            entry.word = word
+
+            if type in ('gismu', 'experimental gismu'):
+                entry.searchaffixes.append(entry.word)
+                entry.searchaffixes.append(entry.word[0:4])
+
+            for child in entry_elem:
+                tag, text = child.tag, child.text
+                processors.get(tag, lambda a, b: None)(entry, text)
+
+            self.entries[entry.word] = entry
 
         for entry in self.entries.values():
             if entry.notes:
@@ -484,6 +540,8 @@ class Root(object):
             add_stems(token, self.definition_stems, entry)
 
     def _process_notes(self, entry, text):
+        if text is None:
+            text = ""
         entry.notes = tex2html(text)
         entry.textnotes = strip_html(entry.notes)
         tokens = re.findall(r"[\w']+", text, re.UNICODE)
@@ -498,25 +556,58 @@ class Root(object):
         # import pprint
         # pprint.pprint(dict(self.entries.items()))
 
-        count=0
+        nlwords = list(xml.findall('.//nlword'))
+        if nlwords:
+            count = 0
+            for type, _ in TYPES:
+                for word in nlwords:
+                    count += 1
+                    if count % 1000 == 0:
+                        sys.stdout.write('.')
+                        sys.stdout.flush()
 
-        for type, _ in TYPES:
-            for word in xml.findall('.//nlword'):
-                count += 1
-                if count % 1000 == 0:
-                    sys.stdout.write('.')
-                    sys.stdout.flush()
-                # pprint.pprint(word.get('valsi'))
+                    entry = self.entries.get(word.get('valsi'))
+                    if not entry:
+                        continue
+                    if entry.type == type:
+                        gloss = Gloss()
+                        gloss.gloss = word.get('word')
+                        gloss.entry = entry
+                        gloss.sense = word.get('sense')
+                        gloss.place = word.get('place')
+                        self.glosses.append(gloss)
+                        add_stems(gloss.gloss, self.gloss_stems, gloss)
+        else:
+            # lensisku export: gloss and place keywords nested in each entry
+            count = 0
+            entries = xml.findall('.//entry')
+            for entry_elem in entries:
+                word = entry_elem.findtext('word')
+                entry = self.entries.get(word)
+                if not entry:
+                    continue
 
-                entry = self.entries[word.get('valsi')]
-                # pprint.pprint(entry)
-                if entry.type == type:
+                def add_keyword_gloss(keyword):
+                    nonlocal count
+                    text = keyword.findtext('meaning') or (keyword.text or '')
+                    text = text.strip()
+                    if not text:
+                        return
+                    count += 1
+                    if count % 1000 == 0:
+                        sys.stdout.write('.')
+                        sys.stdout.flush()
                     gloss = Gloss()
-                    gloss.gloss = word.get('word')
+                    gloss.gloss = text
                     gloss.entry = entry
-                    gloss.sense = word.get('sense')
-                    gloss.place = word.get('place')
+                    gloss.sense = keyword.get('sense')
+                    gloss.place = keyword.get('place')
                     self.glosses.append(gloss)
                     add_stems(gloss.gloss, self.gloss_stems, gloss)
+
+                for kw in entry_elem.findall('./gloss_keywords/keyword'):
+                    add_keyword_gloss(kw)
+                for kw in entry_elem.findall('./place_keywords/keyword'):
+                    add_keyword_gloss(kw)
         print('')
         print('Rebuild complete.')

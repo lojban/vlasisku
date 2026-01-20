@@ -1,0 +1,21 @@
+services:
+  vlasisku:
+    build: .
+    container_name: vlasisku
+    ports:
+      - "8080:8080"
+    volumes:
+      # Mount the code directory for development (hot reload)
+      - .:/app
+      # Persist database between container restarts
+      - vlasisku_data:/app/vlasisku/data
+    environment:
+      - FLASK_APP=vlasisku
+      - FLASK_ENV=development
+      - DEBUG=true
+      - WEBSITE=localhost:8080
+    restart: unless-stopped
+
+volumes:
+  vlasisku_data:
+    driver: local
