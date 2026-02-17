@@ -515,10 +515,9 @@ class Root(object):
 
     def _process_rafsi(self, entry, text):
         if text is not None:
-            text = text.strip()
-            if text:  # Only append if text is not empty after stripping
-                entry.affixes.append(text)
-                entry.searchaffixes.append(text)
+            for rafsi in text.split():
+                entry.affixes.append(rafsi)
+                entry.searchaffixes.append(rafsi)
 
     def _process_selmaho(self, entry, text):
         entry.grammarclass = text
