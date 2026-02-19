@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
 <ShortName>Lojban dictionary</ShortName>
-<Description>Search the Lojban dictionary jbovlaste.</Description>
-<Tags>vlasisku jbovlaste lojban dictionary</Tags>
+<Description>Search the Lojban dictionary lensisku.</Description>
+<Tags>vlasisku lensisku lojban dictionary</Tags>
 <Url type="text/html" template="{{ url_for('app.query', query='', _external=True) }}{searchTerms}"/>
 <Url type="application/x-suggestions+json" template="{{ url_for('opensearch.suggest', prefix='', _external=True) }}{searchTerms}"/>
 <Image height="16" width="16" type="image/vnd.microsoft.icon">{{ url_for('general.favicon', _external=True) }}</Image>

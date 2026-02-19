@@ -68,10 +68,10 @@ def braces2links_does_known_words():
 
 @test
 def braces2links_does_unknown_words():
-    """The braces2links util links jbovlaste for unknown words"""
+    """The braces2links util links lensisku for unknown words"""
     same(braces2links('{unknown}', database.root.entries),
          '<a href='
-         '"http://jbovlaste.lojban.org/dict/addvalsi.html?valsi=unknown" '
+         '"https://lensisku.lojban.org/en/valsi/unknown" '
          'title="This word is missing, please add it!" class="missing">'
          'unknown</a>')
 

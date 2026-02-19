@@ -65,14 +65,14 @@ def shell_context():
 
 @app.cli.command('updatedb')
 def updatedb():
-    """Export and index a new database from jbovlaste."""
+    """Export and index a new database from lensisku."""
 
     from contextlib import closing
     import urllib.request
     import xml.etree.cElementTree as etree
     import os
 
-    print('Downloading jbovlaste xml file; this may take a bit.')
+    print('Downloading lensisku xml file; this may take a bit.')
 
     # Debugging info is nice
     opener = urllib.request.build_opener(urllib.request.HTTPSHandler(debuglevel=1))
@@ -80,17 +80,15 @@ def updatedb():
     # CloudFlare doesn't give out data to urllib2's default user agent
     opener.addheaders = [('User-Agent', 'vlasisku')]
 
-    # The bot key is essentially a magic secret for vlasisku and things like
-    # it, so you don't have to login with real credentials.  If it stops
-    # working, contact the jbovlaste administrator.
-    # Use cached export from lensisku (same jbovlaste format, but faster/stabler).
+    # working, contact the lensisku administrator.
+    # Use cached export from lensisku (same lensisku format, but faster/stabler).
     url = 'https://lensisku.lojban.org/api/export/cached/en/xml'
     with closing(opener.open(url)) as data:
-        print('Parsing jbovlaste xml')
+        print('Parsing lensisku xml')
         xml = etree.parse(data)
         assert xml.getroot().tag == 'dictionary'
-        print('Storing jbovlaste xml')
-        with open('vlasisku/data/jbovlaste.xml', 'wb') as file:
+        print('Storing lensisku xml')
+        with open('vlasisku/data/lensisku.xml', 'wb') as file:
             xml.write(file, 'utf-8')
         print('Removing old database.')
         os.system('''

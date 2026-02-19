@@ -2,7 +2,7 @@ from vlasisku.utils import compound2affixes
 
 
 class Entry(object):
-    """Container for jbovlaste entry data."""
+    """Container for lensisku entry data."""
 
     #: The word (or compound) this entry describes.
     word = None
@@ -80,7 +80,7 @@ class Entry(object):
 
 
 class Gloss(object):
-    """Container for jbovlaste gloss data."""
+    """Container for lensisku gloss data."""
 
     #: The actual gloss word.
     gloss = None

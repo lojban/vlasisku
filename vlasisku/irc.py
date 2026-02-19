@@ -168,12 +168,12 @@ class WordBot(BotBase):
 
                 self.msg(target, 'downloading...')
                 opener = urllib.request.build_opener()
-                opener.addheaders.append(('Cookie', 'jbovlastesessionid=%s' % self.factory.app.config['BOT_KEY']))
-                url = 'http://jbovlaste.lojban.org/export/xml-export.html?lang=en'
+                opener.addheaders = [('User-Agent', 'vlasisku')]
+                url = 'https://lensisku.lojban.org/api/export/cached/en/xml'
                 with closing(opener.open(url)) as data:
                     xml = etree.parse(data)
                     assert xml.getroot().tag == 'dictionary'
-                    with open('vlasisku/data/jbovlaste.xml', 'w') as file:
+                    with open('vlasisku/data/lensisku.xml', 'w') as file:
                         xml.write(file, 'utf-8')
                 self.msg(target, 'updating...')
                 database.init_app(database.app, True)

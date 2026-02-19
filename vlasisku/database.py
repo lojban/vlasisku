@@ -17,7 +17,7 @@ import sys
 from vlasisku.models import Entry, Gloss
 from vlasisku.utils import parse_query, ignore, unique
 
-# egrep --only-matching 'type="([^"]*)"' vlasisku/data/jbovlaste.xml | sort | uniq -c
+# egrep --only-matching 'type="([^"]*)"' vlasisku/data/lensisku.xml | sort | uniq -c
 TYPES = (
          ('gismu', 'Root words.')                              ,
          ('cmavo', 'Particles.')                               ,
@@ -47,7 +47,7 @@ def load_yaml(filename):
 
 
 def tex2html(tex):
-    """Turn most of the TeX used in jbovlaste into HTML.
+    """Turn most of the TeX used in lensisku into HTML.
 
     >>> tex2html('$x_1$ is $10^2*2$ examples of $x_{2}$.')
     u'x<sub>1</sub> is 10<sup>2\\xd72</sup> examples of x<sub>2</sub>.'
@@ -100,8 +100,7 @@ def braces2links(text, entries):
             values = (m.group(1), entries[m.group(1)].definition, m.group(1))
             return u'<a href="%s" title="%s">%s</a>' % values
         except KeyError:
-            link = u'<a href="http://jbovlaste.lojban.org' \
-                    '/dict/addvalsi.html?valsi=%s" ' \
+            link = u'<a href="https://lensisku.lojban.org/en/valsi/%s" ' \
                     'title="This word is missing, please add it!" ' \
                     'class="missing">%s</a>'
             return link % (m.group(1), m.group(1))
@@ -220,7 +219,7 @@ class Root(object):
         cfg = db.app.config
 
         root_path = db.app.root_path
-        jbovlaste = cfg.get('VLASISKU_JBOVLASTE', 'data/jbovlaste.xml')
+        lensisku = cfg.get('VLASISKU_LENSISKU', 'data/lensisku.xml')
         class_scales = cfg.get('VLASISKU_CLASS_SCALES',
                                'data/class-scales.yml')
         cll = cfg.get('VLASISKU_CLL', 'data/cll.yml')
@@ -230,13 +229,13 @@ class Root(object):
         self.cll = load_yaml(join(root_path, cll))
         self.terminators = load_yaml(join(root_path, terminators))
 
-        with open(join(root_path, jbovlaste), encoding='utf-8') as f:
+        with open(join(root_path, lensisku), encoding='utf-8') as f:
             xml = ElementTree.parse(f)
             print('Rebuilding database; this might take a minute or two.  Printing a . for each thousand entries.')
             self._load_entries(xml)
             self._load_glosses(xml)
 
-        self.etag = str(getmtime(join(root_path, jbovlaste)))
+        self.etag = str(getmtime(join(root_path, lensisku)))
 
     def query(self, query):
         """Query database with query language.
@@ -420,7 +419,7 @@ class Root(object):
                   if e not in exclude)
 
     def _load_entries(self, xml):
-        """Load entries from either the classic jbovlaste schema (<valsi>)
+        """Load entries from either the classic lensisku schema (<valsi>)
         or the lensisku cached export schema (<entries>/<entry>)."""
         valsi_nodes = list(xml.findall('.//valsi'))
         entry_nodes = list(xml.findall('.//entry')) if not valsi_nodes else []
@@ -529,7 +528,7 @@ class Root(object):
         if text in self.cll:
             for path in self.cll[text]:
                 section = '%s.%s' % tuple(path)
-                link = 'http://dag.github.io/cll/%s/%s/'
+                link = 'http://lojban.github.io/cll/%s/%s/'
                 entry.cll.append((section, link % tuple(path)))
 
     def _process_definition(self, entry, text):
